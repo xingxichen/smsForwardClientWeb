@@ -1,4 +1,34 @@
-const { defineConfig } = require('@vue/cli-service')
+const {defineConfig} = require('@vue/cli-service')
+
+
+let versFunc = () => {
+    const d = new Date();
+    const yy = d.getFullYear().toString().slice(2);
+    const MM = d.getMonth() + 1 >= 10 ? d.getMonth() + 1 : "0" + (d.getMonth() + 1);
+    const DD = d.getDate() >= 10 ? d.getDate() : "0" + d.getDate();
+    const h = d.getHours() >= 10 ? d.getHours() : "0" + d.getHours();
+    const mm = d.getMinutes() >= 10 ? d.getMinutes() : "0" + d.getMinutes();
+    return yy + MM + DD + h + mm;
+};
+
+let version = versFunc();
 module.exports = defineConfig({
-  transpileDependencies: true
+    transpileDependencies: true,
+    lintOnSave: false,
+    // publicPath: process.env.NODE_ENV === "production" ? "/dist/" : "/",//url前缀
+    publicPath: process.env.NODE_ENV === "production" ? "/smsFW/" : "/",//url前缀
+    outputDir: `./docs`, //生成打包文件的目录 （会清除上一次的文件）
+    assetsDir: `./${version}`, //打包编译后的静态资源所在的目录位置
+    indexPath: "index.html", //生成的index.html 文件所在的位置
+    filenameHashing: true, //静态文件文件名哈希
+    devServer: {
+        host: '0.0.0.0', hot: true, port: 8080, allowedHosts: 'all', //跨域代理设置
+        proxy: {
+            '/api': {
+                target: 'http://mi.xingxc.fun', changeOrigin: true, ws: true, pathRewrite: {
+                    '^/api': ''
+                }
+            }
+        }
+    },
 })
