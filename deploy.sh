@@ -17,9 +17,9 @@ git add -A
 git commit -m 'deploy'
 
 # 部署到 https://<USERNAME>.github.io
-#git push -f git@github.com:xingxichen/xingxichen.github.io.git main
+git push -f git@github.com:xingxichen/xingxichen.github.io.git main
 
 # 部署到 https://<USERNAME>.github.io/<REPO>
-git push -f git@github.com:xingxichen/smsFW.git main:gh-pages
+#git push -f git@github.com:xingxichen/smsFW.git main:gh-pages
 
 cd -

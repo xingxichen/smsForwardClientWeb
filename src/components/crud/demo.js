@@ -1,7 +1,7 @@
 /** 登录模块接口列表 */
 import axios from '@/components/crud/http'
 import qs from 'qs'
-import SmsForwardUtil from "@/util/SmsForwardUtil";
+import SmsForwardUtil from "@/util/tools";
 
 const demo = {
     getCrudData(params) {

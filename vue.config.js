@@ -16,7 +16,7 @@ module.exports = defineConfig({
     transpileDependencies: true,
     lintOnSave: false,
     // publicPath: process.env.NODE_ENV === "production" ? "/dist/" : "/",//url前缀
-    publicPath: process.env.NODE_ENV === "production" ? "/smsFW/" : "/",//url前缀
+    // publicPath: process.env.NODE_ENV === "production" ? "/smsFW/" : "/",//url前缀
     outputDir: `./docs`, //生成打包文件的目录 （会清除上一次的文件）
     assetsDir: `./${version}`, //打包编译后的静态资源所在的目录位置
     indexPath: "index.html", //生成的index.html 文件所在的位置
@@ -25,10 +25,19 @@ module.exports = defineConfig({
         host: '0.0.0.0', hot: true, port: 8080, allowedHosts: 'all', //跨域代理设置
         proxy: {
             '/api': {
-                target: 'http://mi.xingxc.fun', changeOrigin: true, ws: true, pathRewrite: {
+                target: 'http://xxx.fun', changeOrigin: true, ws: true, pathRewrite: {
                     '^/api': ''
                 }
             }
         }
     },
+    // pwa: {
+    //     iconPaths: {
+    //         favicon32: 'favicon.ico',
+    //         favicon16: 'favicon.ico',
+    //         appleTouchIcon: 'favicon.ico',
+    //         maskIcon: 'favicon.ico',
+    //         msTileImage: 'favicon.ico'
+    //     }
+    // }
 })
