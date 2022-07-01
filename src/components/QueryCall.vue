@@ -1,66 +1,76 @@
 <template>
   <div class="content" @keyup.enter="doQuery">
-    <a-row>
-      <a-space>
-        <div>
-          通话类型:
-        </div>
-        <a-col :span="4">
-          <a-select
-              ref="select"
-              v-model:value="query.type"
-              style="width: 70px"
-          >
-            <a-select-option
-                v-for="item in options"
-                :key="item.value"
-                :value="item.value">
-              {{ item.label }}
-            </a-select-option>
-          </a-select>
-        </a-col>
-        <div>
-          页码:
-        </div>
-        <a-col :span="2">
-          <a-input-number v-model="pagination.current" label="页码" :onchange="doQuery" placeholder="请输入页码"
-                          style="width: 60px"></a-input-number>
-        </a-col>
-        <div>
-          分页大小:
-        </div>
-        <a-col :span="8">
-          <a-input-number v-model="pagination.defaultPageSize" label="分页大小" placeholder="请输入分页大小"
-                          style="width: 60px"></a-input-number>
-        </a-col>
-        <div>
-          手机号模糊匹配:
-        </div>
-        <a-col :span="4">
-          <a-input v-model="query.phone_number" placeholder="请输入关键字" style="width: 150px"></a-input>
-        </a-col>
-        <a-col :span="2">
-          <a-button @click="doQuery" type="primary">刷新</a-button>
-        </a-col>
-      </a-space>
-    </a-row>
+    <a-space direction="vertical">
+      <a-row>
+        <a-space>
+          <a-col>
+            通话类型:
+          </a-col>
+          <a-col>
+            <a-select
+                ref="select"
+                v-model="query.type"
+                style="width: 70px"
+            >
+              <a-select-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :value="item.value">
+                {{ item.label }}
+              </a-select-option>
+            </a-select>
+          </a-col>
+          <a-col>
+            页码:
+          </a-col>
+          <a-col>
+            <a-input-number v-model="pagination.current" :onchange="doQuery" label="页码" placeholder="请输入页码"
+                            style="width: 60px"></a-input-number>
+          </a-col>
+        </a-space>
+      </a-row>
+      <a-row>
+        <a-space>
+          <a-col>
+            分页大小:
+          </a-col>
+          <a-col>
+            <a-input-number v-model="pagination.defaultPageSize" label="分页大小" placeholder="请输入分页大小"
+                            style="width: 60px"></a-input-number>
+          </a-col>
+          <a-col>
+            手机号模糊匹配:
+          </a-col>
+          <a-col>
+            <a-input v-model="query.phone_number" placeholder="请输入关键字" style="width: 100px"></a-input>
+          </a-col>
+        </a-space>
+      </a-row>
+      <a-row>
+        <a-space>
+          <a-col>
+            <a-button type="primary" @click="doQuery">刷新</a-button>
+          </a-col>
+        </a-space>
+      </a-row>
+    </a-space>
     <a-divider>分割线</a-divider>
 
-    <a-table :columns="columns" :data-source="tableData" :rowKey='o=>o.date+o.number' :pagination="pagination"
+    <a-table :columns="columns" :data-source="tableData" :pagination="pagination" :rowKey='o=>o.dateLong+o.number'
              :loading="tableLoading"
              :size="'small'" bordered>
       <template v-slot:number="text, record">
         <div :title="record.name">
-          <a-tag v-if="record.name&&record.name!='未知号码'">
+          <a-tag v-if="record.name&&record.name!=='未知号码'">
             <a-icon type="read"></a-icon>
             {{ record.name }}
           </a-tag>
           <a-tag style="color:#38a624;">
-            {{ record.number }}
+            {{ record.number ? record.number : "-" }}
           </a-tag>
-          <a-tag v-if="record.type=='1'">呼入</a-tag>
-          <a-tag v-else-if="record.type=='2'">呼出</a-tag>
-          <a-tag v-else-if="record.type=='3'">未接</a-tag>
+          <a-tag v-if="record.type===1">呼入</a-tag>
+          <a-tag v-else-if="record.type===2">呼出</a-tag>
+          <a-tag v-else-if="record.type===3">未接</a-tag>
           <a-tag v-else>未知</a-tag>
 
           <a-tag>
@@ -74,10 +84,10 @@
         </div>
       </template>
       <template #sim="text, record">
-        <a-tag v-if="text=='0'" :color="'#38a624'" title="卡槽一">
+        <a-tag v-if="text===0" :color="'#38a624'" title="卡槽一">
           SIM1
         </a-tag>
-        <a-tag v-else-if="text=='1'" :color="'#756616'" title="卡槽二">
+        <a-tag v-else-if="text===1" :color="'#756616'" title="卡槽二">
           SIM2
         </a-tag>
         <a-tag v-else>
@@ -91,16 +101,11 @@
 
 
 <script>
-import Util from "@/util/SmsForwardUtil";
+import * as tools from "@/util/tools";
 import DateFormat from '@/util/dateFormat';
-import Vue from "vue";
-import {SmileOutlined, DownOutlined} from '@ant-design/icons-vue';
 
 export default {
-  components: {
-    SmileOutlined,
-    DownOutlined
-  },
+  components: {},
   data() {
     return {
       query: {
@@ -163,7 +168,7 @@ export default {
       let timestamp = new Date().getTime();
       this.$axios({
         method: 'post',
-        url: Util.serverUrl() + `/call/query`,
+        url: tools.serverUrl() + `/call/query`,
         data: {
           "data": {
             "type": this.query.type,
@@ -172,19 +177,13 @@ export default {
             "phone_number": this.query.phone_number,
           },
           "timestamp": timestamp,
-          "sign": Util.sisgn(timestamp, Util.secret())
+          "sign": tools.sign(timestamp, tools.secret())
         }
       }).then(res => {
-        if (res.data.code === 200) {
-          Vue.prototype.$message.success(res.data.msg)
-          this.tableData = res.data.data
-          this.pagination.total = res.data.data.length
-        } else {
-          Vue.prototype.$message.error('请求异常:' + res.data.msg)
-        }
+        this.tableData = res.data.data
+        this.pagination.total = res.data.data.length
         this.tableLoading = false
       }).catch(err => {
-        Vue.prototype.$message.error('请求异常:' + err.message)
         this.tableLoading = false
       })
     },

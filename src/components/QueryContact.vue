@@ -1,38 +1,57 @@
 <template>
-  <div class="content" @keyup.enter="doQuery">
-    <a-row>
-      <a-space>
-        <div>
-          姓名模糊匹配:
-        </div>
-        <a-col :span="8">
-          <a-input v-model="query.name" label="分页大小" placeholder="请输入姓名"
-                   style="width: 150px"></a-input>
-        </a-col>
-        <div>
-          手机号模糊匹配:
-        </div>
-        <a-col :span="4">
-          <a-input v-model="query.phone_number" placeholder="请输入关键字" style="width: 150px"></a-input>
-        </a-col>
-        <a-col :span="2">
-          <a-button @click="doQuery" type="primary">刷新</a-button>
-        </a-col>
-      </a-space>
-    </a-row>
-    <a-divider>分割线</a-divider>
+  <div class="content" style="width: 100%;" @keyup.enter="doQuery">
+    <a-space direction="vertical">
+      <a-row>
+        <a-space>
+          <a-col style="width: 60px;">
+            姓名:
+          </a-col>
+          <a-col>
+            <a-input v-model="query.name" allow-clear
+                     placeholder="请输入姓名"
+                     style="width: 150px"
+                     type="text"
+            ></a-input>
+          </a-col>
+        </a-space>
+      </a-row>
+      <a-row>
+        <a-space>
+          <a-col style="width: 60px;">
+            手机号:
+          </a-col>
+          <a-col>
+            <a-input v-model="query.phone_number" allow-clear
+                     placeholder="请输入手机号"
+                     style="width: 150px"
+                     type="text"
+            ></a-input>
+          </a-col>
+        </a-space>
+      </a-row>
+      <a-col>
+        <a-button type="primary" @click="doQuery">刷新</a-button>
+      </a-col>
+    </a-space>
+    <a-divider :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0' }">
+      分割线
+    </a-divider>
 
-    <a-table :columns="columns" :data-source="tableData" rowKey='phone_number'
+    <a-table :columns="columns" :data-source="tableData" :pagination="pagination"
              :loading="tableLoading"
+             :rowKey='record=>record.name+record.phone_number'
              :size="'small'" bordered>
+      <template v-slot:name="text, record">
+        <div :title="record.name" rel="external nofollow" style="font-size: 15px;color: #2f54eb"
+             @dblclick="callLocal(record.phone_number)">
+          <a-icon type="read"></a-icon>
+          {{ record.name }}
+        </div>
+      </template>
       <template v-slot:phone_number="text, record">
-        <div :title="record.name">
-          <a-tag v-if="record.name&&record.name!='未知号码'">
-            <a-icon type="read"></a-icon>
-            {{ record.name }}
-          </a-tag>
-          <a-tag style="color:#38a624;">
-            {{ record.phone_number }}
+        <div :title="record.name" @dblclick="callLocal(record.phone_number)">
+          <a-tag style="color:#38a624;font-size: 20px">
+            {{ handlePhoneNumber(record.phone_number) }}
           </a-tag>
         </div>
       </template>
@@ -43,9 +62,8 @@
 
 
 <script>
-import Util from "@/util/SmsForwardUtil";
 import DateFormat from '@/util/dateFormat';
-import Vue from "vue";
+import * as tools from "@/util/tools";
 
 export default {
   components: {},
@@ -59,11 +77,29 @@ export default {
       tableData: [],
       columns: [
         {
-          title: "详细",
+          title: "姓名",
+          align: 'left',
+          dataIndex: "name",
+          width: 90,
+          scopedSlots: {customRender: 'name'}
+        }, {
+          title: "号码",
+          align: 'left',
           dataIndex: "phone_number",
+          // width: 200,
           scopedSlots: {customRender: 'phone_number'}
         }
-      ]
+      ],
+      pagination: {
+        total: 0,
+        current: 1,
+        defaultPageSize: 20,
+        showTotal: total => `共 ${total} 条`,
+        showSizeChanger: true,
+        pageSizeOptions: ['20', '50', '80', '100'],
+        onChange: (current, pageSize) => this.onPageChange(current),
+        onShowSizeChange: (current, pageSize) => this.onPageShowSizeChange(pageSize)
+      }
     }
   },
   created() {
@@ -76,30 +112,37 @@ export default {
       let timestamp = new Date().getTime();
       this.$axios({
         method: 'post',
-        url: Util.serverUrl() + `/contact/query`,
+        url: tools.serverUrl() + `/contact/query`,
         data: {
           "data": {
             "name": this.query.name,
             "phone_number": this.query.phone_number,
           },
           "timestamp": timestamp,
-          "sign": Util.sisgn(timestamp, Util.secret())
+          "sign": tools.sign(timestamp, tools.secret())
         }
       }).then(res => {
-        if (res.data.code === 200) {
-          Vue.prototype.$message.success(res.data.msg)
-          this.tableData = res.data.data
-        } else {
-          Vue.prototype.$message.error('请求异常:' + res.data.msg)
-        }
+        this.tableData = res.data.data
         this.tableLoading = false
       }).catch(err => {
-        Vue.prototype.$message.error('请求异常:' + err.message)
         this.tableLoading = false
       })
     },
     format(date, fmt) {
       return DateFormat.format(new Date(date), fmt)
+    },
+    handlePhoneNumber(phone_number) {
+      phone_number = phone_number.startsWith('+86') ? phone_number.substring(3) : phone_number
+      return phone_number.replaceAll('-', '').replaceAll(' ', '')
+    },
+    callLocal(tel) {
+      tools.callLocal(tel)
+    },
+    onPageChange(page, pageSize) {
+      this.pagination.current = page
+    },
+    onPageShowSizeChange(pageSize) {
+      this.pagination.defaultPageSize = pageSize
     }
   },
   watch: {}
