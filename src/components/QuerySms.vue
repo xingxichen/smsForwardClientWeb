@@ -35,10 +35,10 @@
         <a-spin v-if="loadingMore"/>
         <div
             v-else
-            style="width: 100%;height: 40px;padding: 0 0;background-color: #bfbfbf"
+            style="width: 100%;height: 80px;padding: 0 0;"
             @click="onLoadMore">
-          <div style="font-size: 30px;color: #2f54eb">
-            更多&gt;
+          <div style="font-size: 20px;line-height: 80px;color: #2f54eb;">
+            更多&gt;&gt;
           </div>
         </div>
       </div>

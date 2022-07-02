@@ -16,13 +16,13 @@ module.exports = defineConfig({
     transpileDependencies: true,
     lintOnSave: false,
     // publicPath: process.env.NODE_ENV === "production" ? "/dist/" : "/",//url前缀
-    // publicPath: process.env.NODE_ENV === "production" ? "/smsFW/" : "/",//url前缀
+    // publicPath: process.env.NODE_ENV === "production" ? "/smsForwardClientWeb/" : "/",//url前缀
     outputDir: `./docs`, //生成打包文件的目录 （会清除上一次的文件）
     assetsDir: `./${version}`, //打包编译后的静态资源所在的目录位置
     indexPath: "index.html", //生成的index.html 文件所在的位置
     filenameHashing: true, //静态文件文件名哈希
     devServer: {
-        host: '0.0.0.0', hot: true, port: 8080, allowedHosts: 'all', //跨域代理设置
+        host: '0.0.0.0', hot: true, port: 12345, allowedHosts: 'all', //跨域代理设置
         proxy: {
             '/api': {
                 target: 'http://xxx.fun', changeOrigin: true, ws: true, pathRewrite: {

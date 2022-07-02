@@ -1,26 +1,31 @@
 <template>
   <div class="content">
-    <div v-show="inited">
+    <div v-show="inited&&showMenu" id="menuId">
       <a-button-group v-for="row in this.routes" :key="row[0].path">
         <a-button v-for="it in row" :key="it.path" :disabled="it.meta.auth&&!configQueryData[it.meta.auth]" ghost
                   style="width: 90px"
-                  type="primary" @click="toPage(it.path)">
+                  :type="currentRoutePath()===it.path?'primary':''" @click="toPage(it.path)">
           {{ it.meta.title }}
         </a-button>
       </a-button-group>
-      <a-divider id="divider" style="margin: 5px 0">
+      <a-divider id="divider" style="margin:  0">
       </a-divider>
     </div>
-    <router-view @inited="initedFunc"></router-view>
+    <router-view id="router-view" @inited="initedFunc"></router-view>
   </div>
 </template>
 
 <script>
-import loginPage from "@/components/LoginPage.vue";
 import * as tools from "@/util/tools";
 import {CONFI_GQUERY, INITED} from "@/store/storeKeys";
 
 export default {
+  props: {
+    showMenu: {
+      type: Boolean,
+      default: true
+    }
+  },
   data() {
     return {
       targetOffset: undefined,
@@ -45,9 +50,7 @@ export default {
   mounted() {
 
   },
-  components: {
-    loginPage
-  },
+  components: {},
   methods: {
     initedFunc(inited) {
       this.inited = inited;
@@ -72,10 +75,24 @@ export default {
       if (toElement) {
         toElement.scrollIntoView(true)
       }
+    },
+    currentRoutePath() {
+      return this.$router.currentRoute.path
     }
   },
   watch: {}
 }
 </script>
-<style>
+<style scoped>
+#menuId {
+  position: fixed;
+  top: 0;
+  width: 105vw;
+  z-index: 2;
+  background-color: rgba(0, 0, 0, 60%);
+}
+
+#router-view {
+  margin-top: 3em;
+}
 </style>

@@ -80,7 +80,7 @@ export default {
       this.options[0].label = confiQquery['extra_sim1']
     }
     if (confiQquery['extra_sim2']) {
-      this.options[1].label = confiQquery['extra_sim1']
+      this.options[1].label = confiQquery['extra_sim2']
     }
     setInterval(() => {
       return this.countdown > 0 ? this.countdown-- : '';

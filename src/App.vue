@@ -8,7 +8,7 @@
     </div>
     <!--    <canvas id="canvasId"></canvas>-->
     <!--    <router-view v-show="showRouter"></router-view>-->
-    <index-page v-show="showRouter"></index-page>
+    <index-page v-show="showRouter" :showMenu="showMenu"></index-page>
   </div>
 </template>
 <script>
@@ -24,6 +24,7 @@ export default {
   },
   data() {
     return {
+      showMenu: true,
       startTime: new Date(),
       showBackBtn: true,
       showRouter: true,
@@ -60,7 +61,8 @@ export default {
       } else {
         clearTimeout(this.dblTimeout);
         this.dblTimeout = undefined
-        this.update()
+        // this.update()
+        this.showMenu = !this.showMenu
         this.showBackBtn = false
         setTimeout(() => this.showBackBtn = true, timeout)
       }
@@ -97,18 +99,18 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  padding: 0 5px;
-  color: #2c3e50;
-  /*color: #000;*/
-  /*overflow-x: hidden;*/
+  padding: 0;
+  /*color: #2c3e50;*/
+  color: #000;
+  overflow-x: hidden;
   overflow-y: scroll;
   position: absolute;
-  height: 100vh;
+  height: 200vw;
   width: 100vw;
 
   background: rgba(87, 87, 94, 0) fixed 0 0 /*url('assets/logo.png')*/;
-  margin: 0 auto;
-  /*border: 1px solid greenyellow;*/
+  margin: 0;
+  border: 1px solid greenyellow;
 }
 
 /** {*/
@@ -117,16 +119,16 @@ export default {
 /*}*/
 
 .backId {
-  position: absolute;
+  position: fixed;
   top: 10px;
   left: 10px;
-  font-size: xx-large;
+  font-size: 2em;
   z-index: 999;
-  /*border: 1px solid greenyellow;*/
+  border: 1px solid greenyellow;
 }
 
 #canvasId {
-  height: 100vh;
+  height: 100vw;
   width: 100vw;
   position: absolute;
   z-index: 999;

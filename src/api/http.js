@@ -2,8 +2,8 @@
 import Vue from "vue";
 
 axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
-//这个是设置请求拦截器的api，传入两个回调，第一个成功回调，第二个失败回调。
 
+//这个是设置请求拦截器的api，传入两个回调，第一个成功回调，第二个失败回调。
 export const LOADING_MSG_KEY = 'LOADING_MSG_KEY'
 axios.interceptors.request.use(function (config) {
     console.log("请求拦截器1调用成功");
