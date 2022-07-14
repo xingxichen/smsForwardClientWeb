@@ -13,9 +13,7 @@ let versFunc = () => {
 
 let version = versFunc();
 module.exports = defineConfig({
-    transpileDependencies: true,
-    lintOnSave: false,
-    // publicPath: process.env.NODE_ENV === "production" ? "/dist/" : "/",//url前缀
+    transpileDependencies: true, lintOnSave: false, publicPath: "./",//url前缀
     // publicPath: process.env.NODE_ENV === "production" ? "/smsForwardClientWeb/" : "/",//url前缀
     outputDir: `./docs`, //生成打包文件的目录 （会清除上一次的文件）
     assetsDir: `./${version}`, //打包编译后的静态资源所在的目录位置
@@ -30,8 +28,7 @@ module.exports = defineConfig({
                 }
             }
         }
-    },
-    // pwa: {
+    }, // pwa: {
     //     iconPaths: {
     //         favicon32: 'favicon.ico',
     //         favicon16: 'favicon.ico',
@@ -40,4 +37,34 @@ module.exports = defineConfig({
     //         msTileImage: 'favicon.ico'
     //     }
     // }
+    pluginOptions: {
+        electronBuilder: {
+            // preload: './preload.js',
+            builderOptions: {
+                "productName": "smsFW",
+                "appId": "xingxichen.el_smsFW",
+                "copyright": "xingxichen©smsFW",
+                // "directories": {
+                //     "output": "app_file"
+                // },
+                "nsis": {
+                    "oneClick": false,
+                    "allowElevation": true,
+                    "allowToChangeInstallationDirectory": true,
+                    "installerIcon": "./public/favicon256x256.ico",
+                    "uninstallerIcon": "./public/favicon256x256.ico",
+                    "installerHeaderIcon": "./public/favicon256x256.ico",
+                    "createDesktopShortcut": true,
+                    "createStartMenuShortcut": true,
+                    "shortcutName": "短信转发器"
+                },
+                "win": {
+                    "icon": "./public/favicon256x256.ico", "target": [{
+                        "target": "nsis", "arch": ["ia32"]
+                    }]
+                }
+
+            },
+        }
+    },
 })

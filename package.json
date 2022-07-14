@@ -1,17 +1,32 @@
 {
-  "name": "smsFW",
+  "name": "smsForwarder",
   "version": "0.1.0",
   "private": true,
+  "author": "xingxichen",
+  "license": "ISC",
+  "main": "background.js",
+  "description": "短信转发器控制端",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps"
   },
+  "keywords": [
+    "xingxichen"
+  ],
   "dependencies": {
     "ant-design-vue": "^1.7.8",
     "axios": "^0.27.2",
     "core-js": "^3.8.3",
     "crypto-js": "^4.1.1",
+    "electron": "^19.0.8",
+    "electron-builder": "^23.1.0",
+    "electron-devtools-installer": "^3.2.0",
+    "electron-packager": "^15.5.1",
     "less": "^2.7.3",
     "less-loader": "^4.1.0",
     "qs": "^6.9.4",
@@ -29,10 +44,14 @@
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-vuex": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "babel-plugin-import": "^1.13.5",
+    "electron-devtools-installer": "^3.1.0",
+    "electron-builder": "^23.1.0",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
+    "vue-cli-plugin-electron-builder": "~2.1.1",
     "vue-template-compiler": "^2.6.14"
   },
   "eslintConfig": {
