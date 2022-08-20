@@ -1,6 +1,4 @@
 import CryptoJS from "crypto-js/crypto-js";
-import * as storeKeys from "@/store/storeKeys"
-import {CONFI_GQUERY, ENABLE_API_CLONE} from "@/store/storeKeys"
 
 export const sign = (timestamp, scret) => {
     var hash = CryptoJS.HmacSHA256(timestamp + "\n" + scret, scret);
@@ -47,37 +45,15 @@ export const setIcon = function (imageData) {
     document.getElementsByTagName("head")[0].appendChild(link);
 }
 
-
-export function store(key, secret) {
-    if (secret !== undefined) {
-        localStorage.setItem(key, secret)
-        return secret;
-    }
-    var item = localStorage.getItem(key);
-    return item ? item : '';
+export function getOrDefault(store, key, def) {
+    const storeElement = store[key];
+    return storeElement != null ? storeElement : def;
 }
 
-export const historyServer = obj => {
-    if (obj !== undefined) {
-        let serverArr = historyServer();
-        serverArr.push(obj)
-        store(storeKeys.HISTORY_SERVER, JSON.stringify(serverArr))
-        return obj;
-    }
-    var item = store(storeKeys.HISTORY_SERVER);
-    return item ? JSON.parse(item) : [];
+export function unique(arr, func) {
+    const res = new Map();
+    return arr.filter(it => {
+        let key = func(it);
+        return key && !res.has(key) && res.set(key, true);
+    });
 }
-export const enableCloneConfig = () => {
-    var item = store(CONFI_GQUERY);
-    return item ? JSON.parse(item)[ENABLE_API_CLONE] : false;
-}
-
-export const secret = secret => {
-    // if (obj !== undefined) {
-    //     var serverArr = historyServer();
-    //
-    // }
-    return store(storeKeys.SECRET, secret)
-};
-
-export const serverUrl = secret => store(storeKeys.SERVER_URL, secret);

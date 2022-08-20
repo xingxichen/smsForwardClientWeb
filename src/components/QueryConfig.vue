@@ -6,7 +6,7 @@
           <a-col> 版本码：</a-col>
           <a-col>
             <a-input-number
-                v-model="version_code"
+                v-model="configQuery.version_code"
                 placeholder="请输入版本码"
                 style="width: 150px"
             />
@@ -16,7 +16,7 @@
       <a-row>
         <a-space>
           <a-col>
-            <a-button v-auth="{auth:enableCloneConfig}" :style="buttonStyle" type="primary" @click="pull">
+            <a-button v-auth="{auth:()=> enableCloneConfig}" :style="buttonStyle" type="primary" @click="pull">
               获取配置
             </a-button
             >
@@ -27,7 +27,7 @@
                 <p style="color: red">用页面显示的配置覆盖服务端的配置？</p>
               </template>
               <a-icon slot="icon" style="color: red" type="question-circle-o"/>
-              <a-button v-auth="{auth:enableCloneConfig}" :style="buttonStyle" type="primary">
+              <a-button v-auth="{auth:()=> enableCloneConfig}" :style="buttonStyle" type="primary">
                 推送配置
               </a-button
               >
@@ -51,7 +51,7 @@
             </a-popconfirm>
           </a-col>
           <a-col>
-            <a-button :disabled="fileList&&fileList.length>0?undefined:true" :style="buttonStyle" type="primary"
+            <a-button :disabled="fileList&&fileList.length>0?null:true" :style="buttonStyle" type="primary"
                       @click="readFile">
               预览文件
             </a-button
@@ -92,7 +92,9 @@
 import * as tools from "@/util/tools";
 import JsonPre from "@/components/JsonPre";
 import {downLoad} from "@/util/fileUtil";
+import {CONFIG_QUERY, ENABLE_API_CLONE, SECRET, SERVER_URL} from '@/store/storeKeys'
 import Vue from 'vue'
+import {mapGetters} from "vuex";
 
 export default {
   components: {
@@ -102,11 +104,18 @@ export default {
     return {
       fileList: [],
       json: "",
-      version_code: 300042,
       buttonStyle: {
         width: "110px",
       },
     };
+  },
+  computed: {
+    ...mapGetters({configQuery: CONFIG_QUERY}),
+    ...mapGetters({secret: SECRET}),
+    ...mapGetters({serverUrl: SERVER_URL}),
+    enableCloneConfig() {
+      return tools.getOrDefault(this.configQuery, ENABLE_API_CLONE, false)
+    }
   },
   created: function () {
     this.pull()
@@ -139,13 +148,13 @@ export default {
       let timestamp = new Date().getTime();
       this.$axios({
         method: "post",
-        url: tools.serverUrl() + `/clone/pull`,
+        url: this.serverUrl + `/clone/pull`,
         data: {
           data: {
-            version_code: this.version_code,
+            version_code: tools.getOrDefault(this.configQuery, 'version_code', -1),
           },
           timestamp: timestamp,
-          sign: tools.sign(timestamp, tools.secret()),
+          sign: tools.sign(timestamp, this.secret),
         },
       }).then((res) => {
         // Vue.prototype.$message.destroy
@@ -159,19 +168,16 @@ export default {
       let timestamp = new Date().getTime();
       this.$axios({
         method: "post",
-        url: tools.serverUrl() + `/clone/push`,
+        url: this.serverUrl + `/clone/push`,
         data: {
           data: this.json,
           timestamp: timestamp,
-          sign: tools.sign(timestamp, tools.secret()),
+          sign: tools.sign(timestamp, this.secret),
         },
       }).then((res) => {
         // Vue.prototype.$message.destroy
         Vue.prototype.$message.success("推送成功!");
       });
-    },
-    enableCloneConfig() {
-      return tools.enableCloneConfig()
     }
   },
   watch: {}

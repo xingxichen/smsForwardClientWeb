@@ -6,8 +6,6 @@
     <div v-show="!showBackBtn" @click="update">
       <a-icon class="backId" type="home"/>
     </div>
-    <!--    <canvas id="canvasId"></canvas>-->
-    <!--    <router-view v-show="showRouter"></router-view>-->
     <index-page v-show="showRouter" :showMenu="showMenu"></index-page>
   </div>
 </template>
@@ -40,14 +38,6 @@ export default {
     setInterval(() => {
       document.title = (DateFormat.format(this.startTime, "HH:mm:ss") + "-" + DateFormat.format(new Date(), "HH:mm:ss"))
     }, 1000)
-    //
-    // var x = document.createElement("CANVAS");
-    // var ctx=x.getContext("2d");
-    // ctx.fillStyle="#00ff40";
-    // ctx.fillRect(0,0,10000,10000);
-    //
-    // console.log(ctx)
-    // document.body.appendChild(x);
   },
   computed: {},
   methods: {
@@ -99,15 +89,17 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  padding: 0;
+  /*align-items: center;*/
+  /*display: flex;*/
+  padding: 0 5%;
   /*color: #2c3e50;*/
   color: #000;
+  /*overflow: hidden;*/
   overflow-x: hidden;
   overflow-y: scroll;
   position: absolute;
-  height: 200vw;
+  height: 100vh;
   width: 100vw;
-
   background: rgba(87, 87, 94, 0) fixed 0 0 /*url('assets/logo.png')*/;
   margin: 0;
   border: 1px solid greenyellow;
@@ -125,12 +117,5 @@ export default {
   font-size: 2em;
   z-index: 999;
   border: 1px solid greenyellow;
-}
-
-#canvasId {
-  height: 100vw;
-  width: 100vw;
-  position: absolute;
-  z-index: 999;
 }
 </style>

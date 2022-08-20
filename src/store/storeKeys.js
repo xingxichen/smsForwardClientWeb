@@ -1,8 +1,10 @@
-﻿export const INITED = "inited"
+﻿export const STORAGE = "storage"
+export const INITED = "inited"
 export const SECRET = "secret"
 export const SERVER_URL = "serverUrl"
 export const HISTORY_SERVER = "historyServer"
-export const CONFI_GQUERY = "configQuery"
+export const DEL_SERVER = "delServer"
+export const CONFIG_QUERY = "configQuery"
 
 
 export const ENABLE_API_BATTERY_QUERY = "enable_api_battery_query"

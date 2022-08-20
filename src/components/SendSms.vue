@@ -48,40 +48,34 @@
 
 <script>
 import * as tools from "@/util/tools";
-import {CONFI_GQUERY} from "@/store/storeKeys";
+import {CONFIG_QUERY, SECRET, SERVER_URL} from "@/store/storeKeys";
+import {mapGetters} from "vuex";
+import Vue from "vue";
 
 export default {
   data() {
     return {
       countdown: 0,
-      options: [
-        {
-          value: '1',
-          label: ''
-        },
-        {
-          value: '2',
-          label: ''
-        }
-      ],
       phone: '',
       content: '',
       solt: '1'
     }
   },
+  computed: {
+    // ...mapGetters({configQuery: CONFIG_QUERY}),
+    ...mapGetters({serverUrl: SERVER_URL}),
+    ...mapGetters({secret: SECRET}),
+    options() {
+      let options = [{value: '1'}, {value: '2'}];
+      let confiQuery = this.$store.getters[CONFIG_QUERY]
+      Vue.set(options[0], 'label', tools.getOrDefault(confiQuery, 'extra_sim1', ""))
+      Vue.set(options[1], 'label', tools.getOrDefault(confiQuery, 'extra_sim2', ""))
+      return options
+    }
+  },
   created() {
-    this.phone = tools.store("send-phone")
-    this.content = tools.store("send-content")
-
-    const store = tools.store(CONFI_GQUERY);
-
-    const confiQquery = store ? JSON.parse(store) : {};
-    if (confiQquery['extra_sim1']) {
-      this.options[0].label = confiQquery['extra_sim1']
-    }
-    if (confiQquery['extra_sim2']) {
-      this.options[1].label = confiQquery['extra_sim2']
-    }
+    this.phone = this.$ls.get("send-phone", "")
+    this.content = this.$ls.get("send-content", "")
     setInterval(() => {
       return this.countdown > 0 ? this.countdown-- : '';
     }, 1000)
@@ -92,28 +86,28 @@ export default {
       this.countdown = 5;
       this.$axios({
         method: 'post',
-        url: tools.serverUrl() + `/sms/send`,
+        url: this.serverUrl + '/sms/send',
         data: {
-          "data": {
-            "sim_slot": this.solt,
-            "phone_numbers": this.phone,
-            "msg_content": this.content,
+          data: {
+            sim_slot: this.solt,
+            phone_numbers: this.phone,
+            msg_content: this.content,
           },
-          "timestamp": timestamp,
-          "sign": tools.sign(timestamp, tools.secret())
+          timestamp: timestamp,
+          sign: tools.sign(timestamp, this.secret)
         }
       }).then(res => {
-        tools.store("send-phone", this.phone)
-        tools.store("send-content", this.content)
+        this.$ls.set("send-phone", this.phone)
+        this.$ls.set("send-content", this.content)
       }).catch(err => {
       })
     }
   },
   watch: {
-    phone: function (newVal) {
+    phone(newVal) {
 
     },
-    content: function (newVal) {
+    content(newVal) {
 
     },
   }

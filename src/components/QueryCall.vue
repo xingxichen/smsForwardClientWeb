@@ -103,6 +103,8 @@
 <script>
 import * as tools from "@/util/tools";
 import DateFormat from '@/util/dateFormat';
+import {mapGetters} from "vuex";
+import {SECRET, SERVER_URL} from "@/store/storeKeys";
 
 export default {
   components: {},
@@ -158,6 +160,10 @@ export default {
       ]
     }
   },
+  computed: {
+    ...mapGetters({serverUrl: SERVER_URL}),
+    ...mapGetters({secret: SECRET})
+  },
   created() {
     this.doQuery()
   }
@@ -168,7 +174,7 @@ export default {
       let timestamp = new Date().getTime();
       this.$axios({
         method: 'post',
-        url: tools.serverUrl() + `/call/query`,
+        url: this.serverUrl + `/call/query`,
         data: {
           "data": {
             "type": this.query.type,
@@ -177,7 +183,7 @@ export default {
             "phone_number": this.query.phone_number,
           },
           "timestamp": timestamp,
-          "sign": tools.sign(timestamp, tools.secret())
+          "sign": tools.sign(timestamp, this.secret)
         }
       }).then(res => {
         this.tableData = res.data.data

@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <!--      密钥-->
-    <div v-show="showLoginInput">
+    <div v-show="showLoginInput" @keyup.enter="doConfigQuery">
       <img alt="logo" src="@/assets/logo.png">
       <a-space direction="vertical">
         <a-row>
@@ -23,31 +23,63 @@
           </a-col>
         </a-row>
         <a-row>
-          <a-col>
-            <a-button type="primary" @click="configQuery" @keyup.enter="configQuery">连接</a-button>
-          </a-col>
+          <a-space>
+            <a-col>
+              <a-dropdown-button type="primary"
+                                 @click="doConfigQuery"
+              >
+                连接
+                <template #overlay>
+                  <a-menu>
+                    <a-popconfirm v-for="(it,index) in historyServer" :key="index" cancel-text="删除" ok-text="切换"
+                                  placement="top" @cancel="delServer(it.serverUrl)"
+                                  @confirm="chanageServer(it)">
+                      <template #title>
+                        <p>{{ it.serverUrl }}</p>
+                      </template>
+                      <a-menu-item>
+                        <a-icon type="user"/>
+                        {{ it.serverUrl }}
+                      </a-menu-item>
+                    </a-popconfirm>
+                  </a-menu>
+                </template>
+                <template v-show="historyServer && historyServer.length > 0" #icon>
+                  <a-icon :spin="true" theme="twoTone" type="smile"/>
+                </template>
+              </a-dropdown-button>
+            </a-col>
+          </a-space>
         </a-row>
       </a-space>
     </div>
     <div v-show="!showLoginInput">
-      <a-space>
+      <!--      <a-space>-->
         <a-button @click="showLoginInput=true">编辑连接</a-button>
-      </a-space>
+      <!--      </a-space>-->
     </div>
     <div v-show="success&&!showLoginInput" class="descriptions">
-      <a-result status="success" sub-title="服务端连接成功,可以开始远程控制了!" title="连接成功">
+      <a-result status="success" style="height: 30vh" sub-title="服务端连接成功,可以开始远程控制了!" title="连接成功">
       </a-result>
-      <a-button @click="showSimInfo=!showSimInfo">{{ (showSimInfo ? '隐藏' : '显示') + '卡槽' }}</a-button>
+      <a-button type="primary" @click="showSimInfo=!showSimInfo">
+        {{ (showSimInfo ? '隐藏' : '显示') + '卡槽' }}
+      </a-button>
       <div v-show="showSimInfo">
-        <a-descriptions v-show="data.extra_sim1||data.extra_sim2" bordered title="">
+        <a-descriptions bordered>
           <a-descriptions-item label="设备标签">
-            {{ data.extra_device_mark }}
+            {{ configQuery.extra_device_mark|defaultEmpty }}
           </a-descriptions-item>
-          <a-descriptions-item v-if="data.extra_sim1" label="SIM1">
-            {{ data.extra_sim1 }}
+          <a-descriptions-item v-if="configQuery.extra_sim1" label="SIM1">
+            {{ configQuery.extra_sim1|defaultEmpty }}
           </a-descriptions-item>
-          <a-descriptions-item v-if="data.extra_sim1" label="SIM2">
-            {{ data.extra_sim2 }}
+          <a-descriptions-item v-if="configQuery.extra_sim2" label="SIM2">
+            {{ configQuery.extra_sim2|defaultEmpty }}
+          </a-descriptions-item>
+          <a-descriptions-item label="版本号">
+            {{ configQuery.version_name|defaultEmpty }}
+          </a-descriptions-item>
+          <a-descriptions-item label="版本码">
+            {{ configQuery.version_code|defaultEmpty }}
           </a-descriptions-item>
         </a-descriptions>
       </div>
@@ -58,7 +90,8 @@
 
 <script>
 import * as tools from "@/util/tools";
-import {CONFI_GQUERY, INITED} from "@/store/storeKeys";
+import {CONFIG_QUERY, DEL_SERVER, HISTORY_SERVER, SECRET, SERVER_URL} from "@/store/storeKeys";
+import {mapGetters} from "vuex";
 
 
 export default {
@@ -66,72 +99,82 @@ export default {
     return {
       showLoginInput: true,
       showSimInfo: false,
-      // audio: new Audio(require("@/assets/download-complete.wav")),
+      audio: new Audio(require("@/assets/download-complete.wav")),
       // audio: new Audio(require("@/assets/0.mp3")),
-      secret: tools.secret(),
-      serverUrl: tools.serverUrl(),
-      success: tools.store(INITED),
-      data: {}
+      success: !!this.$store.getters[SERVER_URL],
+      secret: this.$store.getters[SECRET],
+      serverUrl: this.$store.getters[SERVER_URL],
+      configQuery: {}
     }
   },
+  filters: {
+    defaultEmpty(val) {
+      return val ? val : "";
+    }
+  },
+  computed: {
+    // 只要数据发生变化，就会触发该函数
+    ...mapGetters({historyServer: HISTORY_SERVER})
+  },
   created: function () {
+    console.log("successVal", this.success)
     if (this.success) {
-      this.configQuery()
+      this.doConfigQuery()
     }
   },
   methods: {
-    configQuery() {
+    doConfigQuery() {
       let timestamp = new Date().getTime();
       this.$axios({
         method: "post",
         url: this.serverUrl + `/config/query`,
         data: {
           data: {},
-          timestamp: timestamp,
+          timestamp,
           sign: tools.sign(timestamp, this.secret),
         },
       }).then((res) => {
-        this.success = true;
+        this.emitInited(true)
         this.showLoginInput = false
         setTimeout(() => this.audio && this.audio.play(), 1)
-        this.data = res.data.data
-        tools.store(CONFI_GQUERY, JSON.stringify(res.data.data))
-        tools.serverUrl(this.serverUrl)
-        tools.secret(this.secret)
+        this.configQuery = res.data.data
+        this.$store.dispatch(CONFIG_QUERY, res.data.data)
+        this.$store.dispatch(HISTORY_SERVER, {[SERVER_URL]: this.serverUrl, [SECRET]: this.secret})
       }).catch((err) => {
-        this.success = '';
+        this.emitInited(false)
       });
     },
-    storeInited(newVal) {
+    emitInited(newVal) {
       this.success = newVal;
       this.$emit("inited", newVal)
-      tools.store(INITED, newVal)
+    },
+    chanageServer(serveConf) {
+      console.log('chanageServer', serveConf)
+      this.$store.dispatch(HISTORY_SERVER, serveConf)
+      this.serverUrl = serveConf[SERVER_URL]
+      this.secret = serveConf[SECRET]
+    },
+    delServer(url) {
+      console.log('delServer', url)
+      this.$store.dispatch(DEL_SERVER, url).then(() => {
+        this.serverUrl = this.$store.getters[SERVER_URL]
+        this.secret = this.$store.getters[SECRET]
+      })
     }
   },
-  computed: {
-    // 只要data中的数据发生变化，就会触发该函数
-    // ...mapGetters(['serverUrl', 'secret'])
-
-  }
-  ,
   watch: {
     secret: function (newVal) {
-      this.storeInited('')
-    }
-    ,
+      this.emitInited(false)
+    },
     serverUrl: function (newVal) {
-      this.storeInited('')
-    }
-    ,
+      this.emitInited(false)
+    },
     success: function (newVal) {
-      this.storeInited(newVal)
+      console.log("success", newVal)
     }
   }
-
-
 }
 </script>
 <style scoped type="less">
-
 
 </style>

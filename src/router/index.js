@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import * as tools from "@/util/tools";
+import store from "@/store";
 import {
     ENABLE_API_BATTERY_QUERY,
     ENABLE_API_CALL_QUERY,
@@ -105,7 +106,7 @@ router.beforeEach((to, from, next) => {
         tools.setIcon(to.meta.icon)
     }
     console.log(to)
-    if (to.path === INDEX_PATH || tools.store(INITED)) {
+    if (to.path === INDEX_PATH || store.getters[INITED]) {
         next()  //执行进入路由，如果不写就不会进入目标页
     } else {
         next(INDEX_PATH)

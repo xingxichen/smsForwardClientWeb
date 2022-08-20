@@ -1,5 +1,5 @@
 <template>
-  <div class="content" @keyup.enter="loadingMore">
+  <div class="content" @keyup.enter="onLoadMore">
     <a-space direction="vertical">
       <a-row>
         <a-space>
@@ -23,7 +23,7 @@
       </a-row>
       <a-row>
         <a-col>
-          <a-button type="primary" @click="loadingMore">刷新</a-button>
+          <a-button type="primary" @click="onLoadMore">刷新</a-button>
         </a-col>
       </a-row>
     </a-space>
@@ -80,6 +80,8 @@
 <script>
 import DateFormat from '@/util/dateFormat';
 import * as tools from "@/util/tools";
+import {mapGetters} from "vuex";
+import {SECRET, SERVER_URL} from "@/store/storeKeys";
 
 export default {
   components: {},
@@ -115,6 +117,10 @@ export default {
       data: [],
     }
   },
+  computed: {
+    ...mapGetters({serverUrl: SERVER_URL}),
+    ...mapGetters({secret: SECRET})
+  },
   created() {
     this.onLoadMore()
   },
@@ -127,7 +133,7 @@ export default {
       let timestamp = new Date().getTime();
       this.$axios({
         method: 'post',
-        url: tools.serverUrl() + `/sms/query`,
+        url: this.serverUrl + `/sms/query`,
         data: {
           "data": {
             "type": this.query.type,
@@ -136,7 +142,7 @@ export default {
             "keyword": this.query.keyword,
           },
           "timestamp": timestamp,
-          "sign": tools.sign(timestamp, tools.secret())
+          "sign": tools.sign(timestamp, this.secret)
         }
       }).then(res => {
         if (res.data.data.length < 1) {

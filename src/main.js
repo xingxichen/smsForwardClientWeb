@@ -5,6 +5,7 @@ import store from '@/store'
 import axios from "@/api/http"
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.less'
+import bootstrap from '@/util/bootstrap'
 
 Vue.config.productionTip = false
 
@@ -32,6 +33,9 @@ Vue.use(Antd);
 
 
 var vue = new Vue({
-    router, store, render: h => h(App)
+    router,
+    store,
+    created: bootstrap,
+    render: h => h(App)
 })
 vue.$mount('#app');
